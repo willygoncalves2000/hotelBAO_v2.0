@@ -9,8 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class ResourceExceptionListener {
@@ -38,6 +41,14 @@ public class ResourceExceptionListener {
         error.setPath(request.getRequestURI());
 
         return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getStatusCode().toString());
+        response.put("message", ex.getReason());  // Essa é a mensagem passada no throw
+        return new ResponseEntity<>(response, ex.getStatusCode());
     }
 
 }
